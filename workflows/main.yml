@@ -1,0 +1,65 @@
+
+name: Build and Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  linux-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: 6.2.*
+          host: linux
+          target: desktop
+          dir: ${{ github.workspace }}/linux/
+
+      - name: Build
+        run: 'qmake automotive.pro && make'
+
+      - name: Save build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-exe
+          path: automotive
+
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: 6.2.*
+          host: windows
+          target: desktop
+          dir: ${{ github.workspace }}/windows/
+      - name: Build
+        run: 'qmake automotive.pro && make'
+
+  release:
+    needs: 
+      - linux-build
+      - windows-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load build output
+        uses: actions/download-artifact@v4
+
+      - name: Checker
+        run: 'pwd && echo ${{ github.workspace }} && tree'
+      
+      - name: Release
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          name: 
+          files: |
+            linux-exe/automotive
+            draw.py
