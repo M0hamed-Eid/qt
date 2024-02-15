@@ -40,7 +40,7 @@ jobs:
           target: desktop
           dir: ${{ github.workspace }}/windows/
       - name: Build
-        run: 'qmake automotive.pro && make'
+        run: 'qmake .\automotive.pro && make'
 
   release:
     needs: 
